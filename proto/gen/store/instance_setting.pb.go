@@ -441,8 +441,10 @@ type InstanceGeneralSetting struct {
 	DisallowChangeUsername bool `protobuf:"varint,8,opt,name=disallow_change_username,json=disallowChangeUsername,proto3" json:"disallow_change_username,omitempty"`
 	// disallow_change_nickname disallows changing nickname.
 	DisallowChangeNickname bool `protobuf:"varint,9,opt,name=disallow_change_nickname,json=disallowChangeNickname,proto3" json:"disallow_change_nickname,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	// hide_visibility disables public/protected memo UI and forces memos private.
+	HideVisibility bool `protobuf:"varint,10,opt,name=hide_visibility,json=hideVisibility,proto3" json:"hide_visibility,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *InstanceGeneralSetting) Reset() {
@@ -527,6 +529,13 @@ func (x *InstanceGeneralSetting) GetDisallowChangeUsername() bool {
 func (x *InstanceGeneralSetting) GetDisallowChangeNickname() bool {
 	if x != nil {
 		return x.DisallowChangeNickname
+	}
+	return false
+}
+
+func (x *InstanceGeneralSetting) GetHideVisibility() bool {
+	if x != nil {
+		return x.HideVisibility
 	}
 	return false
 }
@@ -756,7 +765,9 @@ type InstanceMemoRelatedSetting struct {
 	// enable_double_click_edit enables editing on double click.
 	EnableDoubleClickEdit bool `protobuf:"varint,4,opt,name=enable_double_click_edit,json=enableDoubleClickEdit,proto3" json:"enable_double_click_edit,omitempty"`
 	// reactions is the list of reactions.
-	Reactions     []string `protobuf:"bytes,7,rep,name=reactions,proto3" json:"reactions,omitempty"`
+	Reactions []string `protobuf:"bytes,7,rep,name=reactions,proto3" json:"reactions,omitempty"`
+	// hide_reactions disables reaction UI and reaction API mutations.
+	HideReactions bool `protobuf:"varint,8,opt,name=hide_reactions,json=hideReactions,proto3" json:"hide_reactions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -810,6 +821,13 @@ func (x *InstanceMemoRelatedSetting) GetReactions() []string {
 		return x.Reactions
 	}
 	return nil
+}
+
+func (x *InstanceMemoRelatedSetting) GetHideReactions() bool {
+	if x != nil {
+		return x.HideReactions
+	}
+	return false
 }
 
 type InstanceTagMetadata struct {
@@ -1313,7 +1331,7 @@ const file_store_instance_setting_proto_rawDesc = "" +
 	"\x14InstanceBasicSetting\x12\x1d\n" +
 	"\n" +
 	"secret_key\x18\x01 \x01(\tR\tsecretKey\x12%\n" +
-	"\x0eschema_version\x18\x02 \x01(\tR\rschemaVersion\"\xd6\x03\n" +
+	"\x0eschema_version\x18\x02 \x01(\tR\rschemaVersion\"\xff\x03\n" +
 	"\x16InstanceGeneralSetting\x12<\n" +
 	"\x1adisallow_user_registration\x18\x02 \x01(\bR\x18disallowUserRegistration\x124\n" +
 	"\x16disallow_password_auth\x18\x03 \x01(\bR\x14disallowPasswordAuth\x12+\n" +
@@ -1322,7 +1340,9 @@ const file_store_instance_setting_proto_rawDesc = "" +
 	"\x0ecustom_profile\x18\x06 \x01(\v2\".memos.store.InstanceCustomProfileR\rcustomProfile\x121\n" +
 	"\x15week_start_day_offset\x18\a \x01(\x05R\x12weekStartDayOffset\x128\n" +
 	"\x18disallow_change_username\x18\b \x01(\bR\x16disallowChangeUsername\x128\n" +
-	"\x18disallow_change_nickname\x18\t \x01(\bR\x16disallowChangeNickname\"j\n" +
+	"\x18disallow_change_nickname\x18\t \x01(\bR\x16disallowChangeNickname\x12'\n" +
+	"\x0fhide_visibility\x18\n" +
+	" \x01(\bR\x0ehideVisibility\"j\n" +
 	"\x15InstanceCustomProfile\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x19\n" +
@@ -1343,11 +1363,12 @@ const file_store_instance_setting_proto_rawDesc = "" +
 	"\bendpoint\x18\x03 \x01(\tR\bendpoint\x12\x16\n" +
 	"\x06region\x18\x04 \x01(\tR\x06region\x12\x16\n" +
 	"\x06bucket\x18\x05 \x01(\tR\x06bucket\x12$\n" +
-	"\x0euse_path_style\x18\x06 \x01(\bR\fusePathStyle\"\xc5\x01\n" +
+	"\x0euse_path_style\x18\x06 \x01(\bR\fusePathStyle\"\xec\x01\n" +
 	"\x1aInstanceMemoRelatedSetting\x120\n" +
 	"\x14content_length_limit\x18\x03 \x01(\x05R\x12contentLengthLimit\x127\n" +
 	"\x18enable_double_click_edit\x18\x04 \x01(\bR\x15enableDoubleClickEdit\x12\x1c\n" +
-	"\treactions\x18\a \x03(\tR\treactionsJ\x04\b\x02\x10\x03R\x18display_with_update_time\"w\n" +
+	"\treactions\x18\a \x03(\tR\treactions\x12%\n" +
+	"\x0ehide_reactions\x18\b \x01(\bR\rhideReactionsJ\x04\b\x02\x10\x03R\x18display_with_update_time\"w\n" +
 	"\x13InstanceTagMetadata\x12=\n" +
 	"\x10background_color\x18\x01 \x01(\v2\x12.google.type.ColorR\x0fbackgroundColor\x12!\n" +
 	"\fblur_content\x18\x02 \x01(\bR\vblurContent\"\xb0\x01\n" +

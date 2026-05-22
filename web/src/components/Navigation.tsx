@@ -1,6 +1,7 @@
 import { BellIcon, EarthIcon, InfoIcon, LibraryIcon, PaperclipIcon, UserCircleIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useInstance } from "@/contexts/InstanceContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { useNotifications } from "@/hooks/useUserQueries";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ const Navigation = (props: Props) => {
   const { collapsed, className } = props;
   const t = useTranslate();
   const currentUser = useCurrentUser();
+  const { generalSetting } = useInstance();
   const { data: notifications = [] } = useNotifications();
 
   const homeNavLink: NavLinkItem = {
@@ -76,8 +78,13 @@ const Navigation = (props: Props) => {
   };
 
   const primaryNavLinks: NavLinkItem[] = currentUser
-    ? [homeNavLink, exploreNavLink, attachmentsNavLink, inboxNavLink]
-    : [exploreNavLink, aboutNavLink, signInNavLink];
+    ? [
+        homeNavLink,
+        ...(generalSetting.hideVisibility ? [] : [exploreNavLink]),
+        attachmentsNavLink,
+        ...(generalSetting.hideVisibility ? [] : [inboxNavLink]),
+      ]
+    : [...(generalSetting.hideVisibility ? [] : [exploreNavLink]), aboutNavLink, signInNavLink];
   const inboxAriaLabel = unreadCount > 0 ? `${t("common.inbox")}, ${unreadCount} unread` : t("common.inbox");
 
   return (

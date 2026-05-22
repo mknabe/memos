@@ -140,6 +140,13 @@ const InstanceSection = () => {
             />
           </SettingListItem>
 
+          <SettingListItem label={t("setting.instance.hide-visibility")} description={t("setting.instance.hide-visibility-description")}>
+            <Switch
+              checked={instanceGeneralSetting.hideVisibility}
+              onCheckedChange={(checked) => updatePartialSetting({ hideVisibility: checked })}
+            />
+          </SettingListItem>
+
           <SettingListItem label={t("setting.instance.week-start-day")} description={t("setting.instance.week-start-day-description")}>
             <Select
               value={instanceGeneralSetting.weekStartDayOffset.toString()}

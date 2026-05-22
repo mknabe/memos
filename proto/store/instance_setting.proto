@@ -63,6 +63,8 @@ message InstanceGeneralSetting {
   bool disallow_change_username = 8;
   // disallow_change_nickname disallows changing nickname.
   bool disallow_change_nickname = 9;
+  // hide_visibility disables public/protected memo UI and forces memos private.
+  bool hide_visibility = 10;
 }
 
 message InstanceCustomProfile {
@@ -111,6 +113,8 @@ message InstanceMemoRelatedSetting {
   bool enable_double_click_edit = 4;
   // reactions is the list of reactions.
   repeated string reactions = 7;
+  // hide_reactions disables reaction UI and reaction API mutations.
+  bool hide_reactions = 8;
 }
 
 message InstanceTagMetadata {

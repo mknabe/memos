@@ -386,6 +386,7 @@ func convertInstanceGeneralSettingFromStore(setting *storepb.InstanceGeneralSett
 		WeekStartDayOffset:       setting.WeekStartDayOffset,
 		DisallowChangeUsername:   setting.DisallowChangeUsername,
 		DisallowChangeNickname:   setting.DisallowChangeNickname,
+		HideVisibility:           setting.HideVisibility,
 	}
 	if setting.CustomProfile != nil {
 		generalSetting.CustomProfile = &v1pb.InstanceSetting_GeneralSetting_CustomProfile{
@@ -409,6 +410,7 @@ func convertInstanceGeneralSettingToStore(setting *v1pb.InstanceSetting_GeneralS
 		WeekStartDayOffset:       setting.WeekStartDayOffset,
 		DisallowChangeUsername:   setting.DisallowChangeUsername,
 		DisallowChangeNickname:   setting.DisallowChangeNickname,
+		HideVisibility:           setting.HideVisibility,
 	}
 	if setting.CustomProfile != nil {
 		generalSetting.CustomProfile = &storepb.InstanceCustomProfile{
@@ -472,6 +474,7 @@ func convertInstanceMemoRelatedSettingFromStore(setting *storepb.InstanceMemoRel
 		ContentLengthLimit:    setting.ContentLengthLimit,
 		EnableDoubleClickEdit: setting.EnableDoubleClickEdit,
 		Reactions:             setting.Reactions,
+		HideReactions:         setting.HideReactions,
 	}
 }
 
@@ -483,6 +486,7 @@ func convertInstanceMemoRelatedSettingToStore(setting *v1pb.InstanceSetting_Memo
 		ContentLengthLimit:    setting.ContentLengthLimit,
 		EnableDoubleClickEdit: setting.EnableDoubleClickEdit,
 		Reactions:             setting.Reactions,
+		HideReactions:         setting.HideReactions,
 	}
 }
 

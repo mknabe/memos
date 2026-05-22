@@ -2805,6 +2805,9 @@ components:
                 disallowChangeNickname:
                     type: boolean
                     description: disallow_change_nickname disallows changing nickname.
+                hideVisibility:
+                    type: boolean
+                    description: hide_visibility disables public/protected memo UI and forces memos private.
             description: General instance settings configuration.
         InstanceSetting_MemoRelatedSetting:
             type: object
@@ -2821,6 +2824,9 @@ components:
                     items:
                         type: string
                     description: reactions is the list of reactions.
+                hideReactions:
+                    type: boolean
+                    description: hide_reactions disables reaction UI and reaction API mutations.
             description: Memo-related instance settings and policies.
         InstanceSetting_NotificationSetting:
             type: object

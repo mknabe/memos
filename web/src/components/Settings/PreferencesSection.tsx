@@ -1,6 +1,7 @@
 import { create } from "@bufbuild/protobuf";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { useInstance } from "@/contexts/InstanceContext";
 import { useUpdateUserGeneralSetting } from "@/hooks/useUserQueries";
 import { Visibility } from "@/types/proto/api/v1/memo_service_pb";
 import { UserSetting_GeneralSetting, UserSetting_GeneralSettingSchema } from "@/types/proto/api/v1/user_service_pb";
@@ -17,6 +18,7 @@ import SettingSection from "./SettingSection";
 const PreferencesSection = () => {
   const t = useTranslate();
   const { currentUser, userGeneralSetting: generalSetting, refetchSettings } = useAuth();
+  const { generalSetting: instanceGeneralSetting } = useInstance();
   const { mutate: updateUserGeneralSetting } = useUpdateUserGeneralSetting(currentUser?.name);
 
   const handleLocaleSelectChange = (locale: Locale) => {
@@ -81,36 +83,38 @@ const PreferencesSection = () => {
         </SettingList>
       </SettingGroup>
 
-      <SettingGroup
-        title={t("setting.preference.memo-defaults-title")}
-        description={t("setting.preference.memo-defaults-description")}
-        showSeparator
-      >
-        <SettingList>
-          <SettingListItem
-            label={t("setting.preference.default-memo-visibility")}
-            description={t("setting.preference.default-memo-visibility-description")}
-          >
-            <Select value={setting.memoVisibility || "PRIVATE"} onValueChange={handleDefaultMemoVisibilityChanged}>
-              <SelectTrigger className="min-w-fit">
-                <div className="flex items-center gap-2">
-                  <VisibilityIcon visibility={convertVisibilityFromString(setting.memoVisibility)} />
-                  <SelectValue />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                {[Visibility.PRIVATE, Visibility.PROTECTED, Visibility.PUBLIC]
-                  .map((v) => convertVisibilityToString(v))
-                  .map((item) => (
-                    <SelectItem key={item} value={item} className="whitespace-nowrap">
-                      {t(`memo.visibility.${item.toLowerCase() as Lowercase<typeof item>}`)}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </SettingListItem>
-        </SettingList>
-      </SettingGroup>
+      {!instanceGeneralSetting.hideVisibility && (
+        <SettingGroup
+          title={t("setting.preference.memo-defaults-title")}
+          description={t("setting.preference.memo-defaults-description")}
+          showSeparator
+        >
+          <SettingList>
+            <SettingListItem
+              label={t("setting.preference.default-memo-visibility")}
+              description={t("setting.preference.default-memo-visibility-description")}
+            >
+              <Select value={setting.memoVisibility || "PRIVATE"} onValueChange={handleDefaultMemoVisibilityChanged}>
+                <SelectTrigger className="min-w-fit">
+                  <div className="flex items-center gap-2">
+                    <VisibilityIcon visibility={convertVisibilityFromString(setting.memoVisibility)} />
+                    <SelectValue />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {[Visibility.PRIVATE, Visibility.PROTECTED, Visibility.PUBLIC]
+                    .map((v) => convertVisibilityToString(v))
+                    .map((item) => (
+                      <SelectItem key={item} value={item} className="whitespace-nowrap">
+                        {t(`memo.visibility.${item.toLowerCase() as Lowercase<typeof item>}`)}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </SettingListItem>
+          </SettingList>
+        </SettingGroup>
+      )}
     </SettingSection>
   );
 };

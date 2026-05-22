@@ -50,7 +50,7 @@ const MemoRelatedSettings = () => {
   };
 
   const handleUpdateSetting = async () => {
-    if (memoRelatedSetting.reactions.length === 0) {
+    if (!memoRelatedSetting.hideReactions && memoRelatedSetting.reactions.length === 0) {
       toast.error(t("setting.memo.reactions-required"));
       return;
     }
@@ -98,6 +98,14 @@ const MemoRelatedSettings = () => {
       </SettingGroup>
 
       <SettingGroup title={t("setting.memo.reactions")} description={t("setting.memo.reactions-description")} showSeparator>
+        <SettingList>
+          <SettingListItem label={t("setting.memo.hide-reactions")} description={t("setting.memo.hide-reactions-description")}>
+            <Switch
+              checked={memoRelatedSetting.hideReactions}
+              onCheckedChange={(checked) => updatePartialSetting({ hideReactions: checked })}
+            />
+          </SettingListItem>
+        </SettingList>
         <SettingPanel
           header={
             <div className="flex items-center justify-between gap-3">

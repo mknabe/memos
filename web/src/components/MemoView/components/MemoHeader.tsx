@@ -2,6 +2,7 @@ import { BookmarkIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useInstance } from "@/contexts/InstanceContext";
 import useNavigateTo from "@/hooks/useNavigateTo";
 import i18n from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ import type { MemoHeaderProps } from "../types";
 const MemoHeader: React.FC<MemoHeaderProps> = ({ showCreator, showVisibility, showPinned }) => {
   const t = useTranslate();
   const [reactionSelectorOpen, setReactionSelectorOpen] = useState(false);
+  const { generalSetting, memoRelatedSetting } = useInstance();
 
   const { memo, creator, currentUser, parentPage, isArchived, readonly, openEditor } = useMemoViewContext();
   const { createTime, updateTime, displayTime: memoDisplayTime, isDisplayingUpdatedTime, relativeTimeFormat } = useMemoViewDerived();
@@ -59,7 +61,7 @@ const MemoHeader: React.FC<MemoHeaderProps> = ({ showCreator, showVisibility, sh
       </div>
 
       <div className="flex flex-row justify-end items-center select-none shrink-0 gap-2">
-        {currentUser && !isArchived && (
+        {currentUser && !isArchived && !memoRelatedSetting.hideReactions && (
           <ReactionSelector
             className={cn("border-none w-auto h-auto", reactionSelectorOpen && "block!", "block sm:hidden sm:group-hover:block")}
             memo={memo}
@@ -67,7 +69,7 @@ const MemoHeader: React.FC<MemoHeaderProps> = ({ showCreator, showVisibility, sh
           />
         )}
 
-        {showVisibility && memo.visibility !== Visibility.PRIVATE && (
+        {!generalSetting.hideVisibility && showVisibility && memo.visibility !== Visibility.PRIVATE && (
           <Tooltip>
             <TooltipTrigger>
               <span className="flex justify-center items-center rounded-md hover:opacity-80">
