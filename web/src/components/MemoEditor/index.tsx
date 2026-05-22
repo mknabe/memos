@@ -51,7 +51,7 @@ const MemoEditorImpl: React.FC<MemoEditorProps> = ({
   const editorRef = useRef<EditorRefActions>(null);
   const { state, actions, dispatch } = useEditorContext();
   const { userGeneralSetting } = useAuth();
-  const { aiSetting, fetchSetting } = useInstance();
+  const { aiSetting, generalSetting: instanceGeneralSetting, fetchSetting } = useInstance();
   const [isAudioRecorderOpen, setIsAudioRecorderOpen] = useState(false);
   const [isTranscribingAudio, setIsTranscribingAudio] = useState(false);
 
@@ -64,7 +64,11 @@ const MemoEditorImpl: React.FC<MemoEditorProps> = ({
   }, [aiSetting.providers, aiSetting.transcription?.providerId]);
 
   // Get default visibility from user settings
-  const defaultVisibility = userGeneralSetting?.memoVisibility ? convertVisibilityFromString(userGeneralSetting.memoVisibility) : undefined;
+  const defaultVisibility = instanceGeneralSetting.hideVisibility
+    ? undefined
+    : userGeneralSetting?.memoVisibility
+      ? convertVisibilityFromString(userGeneralSetting.memoVisibility)
+      : undefined;
 
   const { isInitialized } = useMemoInit({
     editorRef,

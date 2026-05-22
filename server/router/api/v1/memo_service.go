@@ -39,6 +39,22 @@ func isSSESuppressed(ctx context.Context) bool {
 	return ok && v
 }
 
+func (s *APIV1Service) isVisibilityHidden(ctx context.Context) (bool, error) {
+	instanceGeneralSetting, err := s.Store.GetInstanceGeneralSetting(ctx)
+	if err != nil {
+		return false, err
+	}
+	return instanceGeneralSetting.GetHideVisibility(), nil
+}
+
+func (s *APIV1Service) areReactionsHidden(ctx context.Context) (bool, error) {
+	instanceMemoRelatedSetting, err := s.Store.GetInstanceMemoRelatedSetting(ctx)
+	if err != nil {
+		return false, err
+	}
+	return instanceMemoRelatedSetting.GetHideReactions(), nil
+}
+
 func (s *APIV1Service) checkMemoReadAccess(ctx context.Context, memo *store.Memo) error {
 	if memo == nil {
 		return status.Errorf(codes.NotFound, "memo not found")
@@ -89,6 +105,13 @@ func (s *APIV1Service) CreateMemo(ctx context.Context, request *v1pb.CreateMemoR
 		CreatorID:  user.ID,
 		Content:    request.Memo.Content,
 		Visibility: convertVisibilityToStore(request.Memo.Visibility),
+	}
+	hideVisibility, err := s.isVisibilityHidden(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get instance general setting")
+	}
+	if hideVisibility {
+		create.Visibility = store.Private
 	}
 
 	// Set custom timestamps if provided in the request.
@@ -281,13 +304,20 @@ func (s *APIV1Service) ListMemos(ctx context.Context, request *v1pb.ListMemosReq
 		memoIDs = append(memoIDs, m.ID)
 	}
 
-	// REACTIONS
-	reactions, err := s.Store.ListReactions(ctx, &store.FindReaction{ContentIDList: contentIDs})
+	var reactions []*store.Reaction
+	hideReactions, err := s.areReactionsHidden(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list reactions")
+		return nil, status.Errorf(codes.Internal, "failed to get instance memo related setting")
 	}
-	for _, reaction := range reactions {
-		reactionMap[reaction.ContentID] = append(reactionMap[reaction.ContentID], reaction)
+	if !hideReactions {
+		// REACTIONS
+		reactions, err = s.Store.ListReactions(ctx, &store.FindReaction{ContentIDList: contentIDs})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to list reactions")
+		}
+		for _, reaction := range reactions {
+			reactionMap[reaction.ContentID] = append(reactionMap[reaction.ContentID], reaction)
+		}
 	}
 
 	// ATTACHMENTS
@@ -375,11 +405,18 @@ func (s *APIV1Service) GetMemo(ctx context.Context, request *v1pb.GetMemoRequest
 		}
 	}
 
-	reactions, err := s.Store.ListReactions(ctx, &store.FindReaction{
-		ContentID: &request.Name,
-	})
+	var reactions []*store.Reaction
+	hideReactions, err := s.areReactionsHidden(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list reactions")
+		return nil, status.Errorf(codes.Internal, "failed to get instance memo related setting")
+	}
+	if !hideReactions {
+		reactions, err = s.Store.ListReactions(ctx, &store.FindReaction{
+			ContentID: &request.Name,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to list reactions")
+		}
 	}
 
 	attachments, err := s.Store.ListAttachments(ctx, &store.FindAttachment{
@@ -502,6 +539,13 @@ func (s *APIV1Service) UpdateMemo(ctx context.Context, request *v1pb.UpdateMemoR
 			update.Payload = memo.Payload
 		} else if path == "visibility" {
 			visibility := convertVisibilityToStore(request.Memo.Visibility)
+			hideVisibility, err := s.isVisibilityHidden(ctx)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to get instance general setting")
+			}
+			if hideVisibility {
+				visibility = store.Private
+			}
 			if memo.ParentUID != nil {
 				parentMemo, err := s.Store.GetMemo(ctx, &store.FindMemo{UID: memo.ParentUID})
 				if err != nil {
@@ -593,11 +637,18 @@ func (s *APIV1Service) DeleteMemo(ctx context.Context, request *v1pb.DeleteMemoR
 		return nil, status.Errorf(codes.PermissionDenied, "permission denied")
 	}
 
-	reactions, err := s.Store.ListReactions(ctx, &store.FindReaction{
-		ContentID: &request.Name,
-	})
+	var reactions []*store.Reaction
+	hideReactions, err := s.areReactionsHidden(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list reactions")
+		return nil, status.Errorf(codes.Internal, "failed to get instance memo related setting")
+	}
+	if !hideReactions {
+		reactions, err = s.Store.ListReactions(ctx, &store.FindReaction{
+			ContentID: &request.Name,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to list reactions")
+		}
 	}
 
 	attachments, err := s.Store.ListAttachments(ctx, &store.FindAttachment{
@@ -837,14 +888,20 @@ func (s *APIV1Service) ListMemoComments(ctx context.Context, request *v1pb.ListM
 		contentIDs = append(contentIDs, memoName)
 		memoIDsForAttachments = append(memoIDsForAttachments, memo.ID)
 	}
-	reactions, err := s.Store.ListReactions(ctx, &store.FindReaction{ContentIDList: contentIDs})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list reactions")
-	}
-
 	memoReactionsMap := make(map[string][]*store.Reaction)
-	for _, reaction := range reactions {
-		memoReactionsMap[reaction.ContentID] = append(memoReactionsMap[reaction.ContentID], reaction)
+	var reactions []*store.Reaction
+	hideReactions, err := s.areReactionsHidden(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get instance memo related setting")
+	}
+	if !hideReactions {
+		reactions, err = s.Store.ListReactions(ctx, &store.FindReaction{ContentIDList: contentIDs})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to list reactions")
+		}
+		for _, reaction := range reactions {
+			memoReactionsMap[reaction.ContentID] = append(memoReactionsMap[reaction.ContentID], reaction)
+		}
 	}
 
 	attachments, err := s.Store.ListAttachments(ctx, &store.FindAttachment{MemoIDList: memoIDsForAttachments})

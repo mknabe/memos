@@ -1,4 +1,5 @@
 import { AttachmentListView, LocationDisplayView, RelationListView } from "@/components/MemoMetadata";
+import { useInstance } from "@/contexts/InstanceContext";
 import { cn } from "@/lib/utils";
 import { MemoRelation_Type } from "@/types/proto/api/v1/memo_service_pb";
 import { useTranslate } from "@/utils/i18n";
@@ -24,6 +25,7 @@ const BlurOverlay: React.FC<{ onClick?: () => void }> = ({ onClick }) => {
 
 const MemoBody: React.FC<MemoBodyProps> = ({ compact }) => {
   const { memo, parentPage, showBlurredContent, blurred, readonly, openEditor, openPreview, toggleBlurVisibility } = useMemoViewContext();
+  const { memoRelatedSetting } = useInstance();
 
   const { handleMemoContentClick, handleMemoContentDoubleClick } = useMemoHandlers({ readonly, openEditor, openPreview });
 
@@ -47,7 +49,7 @@ const MemoBody: React.FC<MemoBodyProps> = ({ compact }) => {
         <AttachmentListView attachments={memo.attachments} onImagePreview={openPreview} />
         <RelationListView relations={referencedMemos} currentMemoName={memo.name} parentPage={parentPage} />
         {memo.location && <LocationDisplayView location={memo.location} />}
-        <MemoReactionListView memo={memo} reactions={memo.reactions} />
+        {!memoRelatedSetting.hideReactions && <MemoReactionListView memo={memo} reactions={memo.reactions} />}
       </div>
 
       {blurred && !showBlurredContent && <BlurOverlay onClick={toggleBlurVisibility} />}

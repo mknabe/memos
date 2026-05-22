@@ -34,11 +34,18 @@ func (s *APIV1Service) buildUpdatedMemoState(ctx context.Context, memoID int32) 
 	}
 
 	memoName := buildMemoName(memo.UID)
-	reactions, err := s.Store.ListReactions(ctx, &store.FindReaction{
-		ContentID: &memoName,
-	})
+	var reactions []*store.Reaction
+	hideReactions, err := s.areReactionsHidden(ctx)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to list reactions")
+		return nil, nil, nil, errors.Wrap(err, "failed to get instance memo related setting")
+	}
+	if !hideReactions {
+		reactions, err = s.Store.ListReactions(ctx, &store.FindReaction{
+			ContentID: &memoName,
+		})
+		if err != nil {
+			return nil, nil, nil, errors.Wrap(err, "failed to list reactions")
+		}
 	}
 	attachments, err := s.Store.ListAttachments(ctx, &store.FindAttachment{
 		MemoID: &memo.ID,

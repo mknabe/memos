@@ -13,6 +13,14 @@ import (
 )
 
 func (s *APIV1Service) ListMemoReactions(ctx context.Context, request *v1pb.ListMemoReactionsRequest) (*v1pb.ListMemoReactionsResponse, error) {
+	hideReactions, err := s.areReactionsHidden(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get instance memo related setting")
+	}
+	if hideReactions {
+		return &v1pb.ListMemoReactionsResponse{Reactions: []*v1pb.Reaction{}}, nil
+	}
+
 	// Extract memo UID and check visibility.
 	memoUID, err := ExtractMemoUIDFromName(request.Name)
 	if err != nil {
@@ -58,6 +66,14 @@ func (s *APIV1Service) ListMemoReactions(ctx context.Context, request *v1pb.List
 }
 
 func (s *APIV1Service) UpsertMemoReaction(ctx context.Context, request *v1pb.UpsertMemoReactionRequest) (*v1pb.Reaction, error) {
+	hideReactions, err := s.areReactionsHidden(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get instance memo related setting")
+	}
+	if hideReactions {
+		return nil, status.Errorf(codes.FailedPrecondition, "reactions are disabled")
+	}
+
 	user, err := s.fetchCurrentUser(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get current user")
@@ -109,6 +125,14 @@ func (s *APIV1Service) UpsertMemoReaction(ctx context.Context, request *v1pb.Ups
 }
 
 func (s *APIV1Service) DeleteMemoReaction(ctx context.Context, request *v1pb.DeleteMemoReactionRequest) (*emptypb.Empty, error) {
+	hideReactions, err := s.areReactionsHidden(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get instance memo related setting")
+	}
+	if hideReactions {
+		return nil, status.Errorf(codes.FailedPrecondition, "reactions are disabled")
+	}
+
 	user, err := s.fetchCurrentUser(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get current user: %v", err)
