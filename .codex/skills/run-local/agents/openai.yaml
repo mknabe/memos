@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Local"
+  short_description: "Start this Memos repo locally and open it in the Codex browser."
+  default_prompt: "Use run-local to start the Memos app locally and open localhost:5230 in the Codex browser."
